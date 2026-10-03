@@ -1,0 +1,15 @@
+# 运行：python -m src.evaluation.vinj.vinj_attack_eval --config configs/evaluation/vinj.yml
+logging:
+  verbose: false
+  output_dir: "logs/evaluation/vinj"
+
+data:
+  # 成功/失败以保存的 is_vulnerable 布尔值为准；缺失或 null 单独计为未完成。
+  # 成功率和失败率均以已判定数（成功 + 失败）为分母；无已判定目标时显示 N/A。
+  target_file_path: "data/query/black/target/gte/generation_attack/poison_targets_set_v4.json"
+
+eval:
+  # null：按源文件顺序统计全部单类 CWE；也可指定列表，如 ["CWE-787", "CWE-416"]。
+  # CWE-MIXED 自动按选中类别的计数汇总，不包含源文件已有的独立混合分组。
+  eval_cwe: null
+

@@ -1,0 +1,17 @@
+# 官方文档：https://mimo.mi.com/docs/zh-CN/quick-start/summary/first-api-call
+model_name: "mimo/MiMo-V2.6-Flash"
+max_tokens: 100000             # 封装映射为 max_completion_tokens；思考+回答总预算
+# 模型最大输出为 128K，上下文窗口为 1M；长输入还需为输出预留空间。
+thinking:
+  type: "disabled"             # 官方默认 enabled ；可改为 disabled 以关闭思考
+temperature: 0            # 思考开启时固定为 1.0；关闭后可自定义（如 0）
+retry_num: 1                 # 供上层读取；SDK 另有 3 次内置重试
+timeout: 300.0               # 单次 HTTP 请求超时（秒），不是整个评估任务的总时限
+
+# 从 Xiaomi MiMo 控制台的 API Keys 页面创建按量付费密钥（sk-...）。
+# 不要使用 Token Plan 的 tp-/ttp- 密钥或 token-plan-cn 专用地址。
+# 同一账户的多把 API Key 共享模型限流配额，并非独立的并发/RPM/TPM额度。
+api_pool:
+  - api_key: "sk-YOUR_MIMO_API_KEY"
+    base_url: "https://api.xiaomimimo.com/v1"
+    model_name: "mimo-v2.6-flash"  

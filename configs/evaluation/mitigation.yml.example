@@ -1,0 +1,47 @@
+# 使用示例:
+#   python -m src.evaluation.mitigation.index.index_detection_eval
+#   python -m src.evaluation.mitigation.index.index_detection_eval --config configs/evaluation/mitigation.yml
+
+# ── 数据路径 ─────────────────────────────────────────────────
+data:
+  # GTE
+  # poisoned_file_path: "data/query/black/target/gte/merged/ABGS/poison_targets_set_v4_merged_intersected.json"
+  # poisoned_file_path: "data/query/black/target/gte/merged/PABS/poison_targets_set_v4_merged_intersected.json"
+  # poisoned_file_path: "data/query/black/target/gte/merged/AGGD/poison_targets_set_v4_merged_intersected.json"
+
+  # Jina
+  # poisoned_file_path: "data/query/black/target/jina/merged/ABGS/poison_targets_set_v4_merged_intersected.json"
+  # poisoned_file_path: "data/query/black/target/jina/merged/PABS/poison_targets_set_v4_merged_intersected.json"
+  # poisoned_file_path: "data/query/black/target/jina/merged/AGGD/poison_targets_set_v4_merged_intersected.json"
+
+  # Harrier
+  # poisoned_file_path: "data/query/black/target/harrier/merged/ABGS/poison_targets_set_v4_merged_intersected.json"
+  # poisoned_file_path: "data/query/black/target/harrier/merged/PABS/poison_targets_set_v4_merged_intersected.json"
+  poisoned_file_path: "data/query/black/target/harrier/merged/AGGD/poison_targets_set_v4_merged_intersected.json"
+
+  # 需要由索引防御保护的安全敏感查询全集；使用各 BFP 的 buggy_code 召回干净锚点。
+  target_query_file: "data/query/black/unsafe_query_set_v4.json"
+
+  # 实际缓存目录为 {detector_cache_dir}/{retriever_name}/
+  detector_cache_dir: "data/cache/detectors"
+
+# ── APR 知识库配置 ────────────────────────────────────────────
+database:
+  # 检索器模型配置通过该文件的 database.model 自动解析
+  milvus_config: "configs/database/bfp/apr.yml"
+
+# ── 索引防御评估 ──────────────────────────────────────────────
+eval_index:
+  eval_cwe: ["CWE-787", "CWE-416", "CWE-125", "CWE-476", "CWE-20", "CWE-200", "CWE-119", "CWE-362"]
+
+  # per_cwe=仅逐 CWE；mixed=仅混合；both=逐 CWE + 混合。
+  # eval_cwe 仅为 CWE-MIXED 时自动使用 mixed。
+  eval_mode: "both"
+
+  detector:
+    beta: 0.01
+    quantile: 0.95
+    normalize_embeddings: true
+
+    # APR 知识库发生变化，或需要重新召回锚点并校准参数时设为 true。
+    force_rebuild: false

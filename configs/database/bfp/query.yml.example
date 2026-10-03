@@ -1,0 +1,33 @@
+# 执行文件: src/rag/bfp/retrieval.ipynb 的 vul_code 检索场景
+
+# 数据路径
+data:
+  # corpus: "data/query/white/query_set.jsonl" 
+  # corpus: "data/query/gray/query_set.jsonl" 
+  corpus: "data/query/black/query_set.jsonl" 
+
+  query: "data/corpus/vul/clustered_rag_data.jsonl"
+
+# 数据库配置
+database:
+  # model: "configs/models/harrier-oss-v1-0.6b.yml"
+  # uri: "data/milvus/bfp/query/white/harrier-oss-v1-0.6b.db" # 本地文件路径
+
+  # model: "configs/models/harrier-oss-v1-0.6b.yml"
+  # uri: "data/milvus/bfp/query/gray/harrier-oss-v1-0.6b.db" # 本地文件路径
+
+  model: "configs/models/harrier-oss-v1-0.6b.yml" # 使用与APR向量知识库不同的检索器构建历史查询向量知识库，以保证实验结果的正交独立
+  uri: "data/milvus/bfp/query/black/harrier-oss-v1-0.6b.db" # 本地文件路径
+
+  collection_name: "bfp" # Milvus数据库内的集合名称（等同于Mysql的表名）
+
+# 检索配置
+retrieval:
+  dense_index_type: "AUTOINDEX" # 密集向量索引类型：自动索引
+  dense_metric_type: "COSINE" # 密集向量距离度量类型：余弦相似度
+  dense_index_params: {"M": 16, "efConstruction": 256} # 密集向量索引参数：M为每个节点存储的邻居数量，efConstruction为搜索时考虑的邻居数量
+  
+  top_k: 10 # 召回数量
+  retrieval_strategy: "dense" # 检索策略：hybrid(混合检索)、dense(密集检索)、sparse(稀疏检索)
+  alpha_weight: 0.5 # 混合检索的权重, 仅在 retrieval_strategy 为 hybrid 时生效, 0.85表示85%的权重给密集向量, 15%的权重给稀疏向量
+  query_target: "vul_code" # 用于选择BFP的查询目标字段，可选项为：fixed_code、buggy_code、vul_code

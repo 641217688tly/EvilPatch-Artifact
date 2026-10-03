@@ -1,0 +1,6 @@
+eval:
+  eval_cwe: ["CWE-125", "CWE-20", "CWE-119", "CWE-787", "CWE-416"] # 要评估的 CWE 类别
+  eval_mode: "mixed" # per_cwe=仅逐 CWE；mixed=仅 CWE-MIXED；both=两者；eval_cwe仅为CWE-MIXED时自动使用mixed
+  eval_target:          # 待评估的投毒目标文件，键为优化器配置别名，值为文件路径
+    "ABGS-SV-OFF": "data/query/black/target/gte/results/poison_targets_set_v4_tau_2_top_10.json"
+    "ABGS-DY-ON": "data/query/black/target/gte/results/poison_targets_set_v4_tau_2_top_10.json"

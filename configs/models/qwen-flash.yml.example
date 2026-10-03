@@ -1,0 +1,10 @@
+model_name: "Qwen/Qwen-Flash"   
+temperature: 0                              # 生成温度（0.0 确定性输出，1.0 高创造性）
+max_tokens: 32000                             # 默认最大生成 token 数
+retry_num: 1                                  # API 调用失败时的重试次数（封装层重试）
+timeout: 300.0                                # 单次 HTTP 请求超时时间（秒，须为正数）
+
+api_pool:
+  - api_key: sk-ws-
+    base_url: "https://<your-workspace-id>.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
+    model_name: "qwen-flash"

@@ -1,0 +1,52 @@
+# ─────────────────────────────────────────────────────────────
+# Python
+# ─────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.history/
+.idea/
+.vscode/
+
+# ─────────────────────────────────────────────────────────────
+# Local configuration and secrets
+#   Ship only the *.yml.example templates. The working copies hold
+#   API keys and machine-specific device settings.
+# ─────────────────────────────────────────────────────────────
+configs/**/*.yml
+!configs/**/*.yml.example
+.env
+
+# ─────────────────────────────────────────────────────────────
+# Runtime output
+# ─────────────────────────────────────────────────────────────
+logs/**
+!logs/.gitkeep
+*.log
+
+# ─────────────────────────────────────────────────────────────
+# Data
+#   Nothing under data/ is committed. The directory skeleton is
+#   kept with .gitkeep placeholders; payloads come from the
+#   HuggingFace dataset release (see data/README.md).
+# ─────────────────────────────────────────────────────────────
+data/**
+!data/**/
+!data/**/.gitkeep
+!data/README.md
+
+# Milvus Lite databases
+*.db

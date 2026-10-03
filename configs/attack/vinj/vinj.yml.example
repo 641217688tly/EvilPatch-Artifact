@@ -1,0 +1,46 @@
+# 使用示例:
+#   python -m src.pipeline.generation_attack.vics_vinj
+#   python -m src.pipeline.generation_attack.vics_vinj --config configs/attack/vinj/vinj.yml
+logging:
+  verbose: false  # true 启用 DEBUG 日志，false 使用 INFO（与 retrieval.yml 一致）
+  debug_dir: "logs/vinj_attack"
+
+data:
+  cwe_file_path: "data/raw/cwe/cwec_v4.19.1.xml"
+  cve_file_path: "data/raw/cwe/CVE_v2026.03.18.json"
+
+  target_file_path: "data/query/black/target/gte/generation_attack/poison_targets_set_v4_tau_2_top_10.json"
+  # target_file_path: "data/query/black/target/jina/generation_attack/poison_targets_set_v4_tau_2_top_10.json"
+
+  cache_folder_path: "data/cache/generation_attack"  # 存放已完成漏洞注入+越狱攻击结果的投毒目标缓存文件夹，供复用
+
+model:
+  vinj_generator_config: "configs/models/deepseek-v4-flash.yml"          # 注入阶段（Stage 1 + Stage 2）使用的生成器
+  judge_generator_config: "configs/models/deepseek-v4-pro.yml"    # 审查阶段（Stage 3, LLM-as-Judge）使用的生成器
+  reranker_generator_config: "configs/models/deepseek-v4-flash.yml"
+  retriever_config: "configs/models/harrier-oss-v1-0.6b.yml" # Step 1 相关漏洞检索使用的嵌入模型
+
+database:
+  clear_cache: false  # true 时在漏洞注入开始前清空 Milvus 中的 Stage 1 漏洞模式缓存集合
+  milvus_config: "configs/database/vul/vinj.yml"
+  
+vinj:
+  enable_cache: false  # true 时在 Stage2 后、Stage3 前从 cache_folder_path 复用已完成生成攻击的投毒目标
+
+  top_k: 5
+  skip_rerank: true    # true 时跳过 LLM-Reranker，直接用 Stage1 检索的全部 top_k 个 CVE 作为 relevant_vul
+
+  # top_k: 50
+  # skip_rerank: false    # true 时跳过 LLM-Reranker，直接用 Stage1 检索的全部 top_k 个 CVE 作为 relevant_vul
+
+  relevant_vul_num: 5   # 每个投毒目标保留的相关 CVE 数量（Step 1 检索 top-k）
+  judge_max_retries: 5  # Stage 4 Judger 最大总判别轮数（含首次调用；覆盖 API、解析和模式遗漏重传）
+  
+  # num_workers: 2     # 处理线程数，为null时线程数等于 len(api_pool), 否则为 min(workers_num, len(api_pool))
+  num_workers: null     # 处理线程数，为null时线程数等于 len(api_pool), 否则为 min(workers_num, len(api_pool))
+  
+  process_cwe: ["CWE-125", "CWE-20", "CWE-119", "CWE-787", "CWE-416"]
+  # process_cwe: ["CWE-MIXED"]
+
+  process_num: null     # 要执行漏洞注入的条目数，null 表示处理全部条目
+  # process_num: 20     # 要执行漏洞注入的条目数，null 表示处理全部条目

@@ -1,0 +1,26 @@
+# 使用示例:
+#   python -m src.pipeline.generation_attack.jailbreak
+#   python -m src.pipeline.generation_attack.jailbreak --config configs/attack/jailbreak/jailbreak.yml
+logging:
+  verbose: false  # true 启用 DEBUG 日志，false 使用 INFO（与 retrieval.yml 一致）
+  debug_dir: "logs/jailbreak_attack"
+
+data:
+  cwe_file_path: "data/raw/cwe/cwec_v4.19.1.xml"
+  cve_file_path: "data/raw/cwe/CVE_v2026.03.18.json"
+
+  target_file_path: "data/query/black/target/gte/generation_attack/poison_targets_set_v4_tau_2_top_10.json"
+  # target_file_path: "data/query/black/target/jina/generation_attack/poison_targets_set_v4_tau_2_top_10.json"
+
+model:
+  jailbreak_generator_config: "configs/models/deepseek-v4-pro.yml"
+
+jailbreak:
+  max_retries: 5        # LLM 输出格式校验失败时的最大重试次数
+  num_workers: null     # 处理线程数，为null时线程数等于 len(api_pool), 否则为 min(workers_num, len(api_pool))
+
+  process_cwe: ["CWE-125", "CWE-20", "CWE-119", "CWE-787", "CWE-416"]
+  # process_cwe: ["CWE-MIXED"]
+  
+  process_num: null     # 要执行越狱注释生成的条目数，null 表示处理全部条目
+  forbidden_words: ["vulnerability", "unsafe", "flaw", "dangerous", "malicious"]

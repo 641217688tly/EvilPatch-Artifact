@@ -1,0 +1,75 @@
+# python -m src.evaluation.generation.generation_attack_eval --config configs/evaluation/generation.yml
+
+# ── 数据路径 ──────────────────────────────────────────────────
+data:
+  # Harrier
+  poisoned_file_path: "data/query/black/target/harrier/merged/ABGS/poison_targets_set_v4_merged_intersected.json"
+  retrieval_dir_path: "data/query/black/test/results/harrier-oss-v1-0.6b/abgs-2026-07-26-22-46"
+
+  # poisoned_file_path: "data/query/black/target/harrier/merged/PABS/poison_targets_set_v4_merged_intersected.json"
+  # retrieval_dir_path: "data/query/black/test/results/harrier-oss-v1-0.6b/pabs-2026-07-26-23-03"
+
+  # poisoned_file_path: "data/query/black/target/harrier/merged/AGGD/poison_targets_set_v4_merged_intersected.json"
+  # retrieval_dir_path: "data/query/black/test/results/harrier-oss-v1-0.6b/aggd-2026-07-26-23-14"
+
+  # GTE
+  # poisoned_file_path: "data/query/black/target/gte/merged/ABGS/poison_targets_set_v4_merged_intersected.json"
+  # retrieval_dir_path: "data/query/black/test/results/gte-modernbert-base/abgs-2026-07-26-05-28"
+
+  # poisoned_file_path: "data/query/black/target/gte/merged/PABS/poison_targets_set_v4_merged_intersected.json"
+  # retrieval_dir_path: "data/query/black/test/results/gte-modernbert-base/pabs-2026-07-26-05-53"
+
+  # poisoned_file_path: "data/query/black/target/gte/merged/AGGD/poison_targets_set_v4_merged_intersected.json"
+  # retrieval_dir_path: "data/query/black/test/results/gte-modernbert-base/aggd-2026-07-26-06-02"
+
+
+database:
+  milvus_config: "configs/database/vul/vinj.yml"
+
+# ── 模型配置 ─────────────────────────────────────────────────
+model:
+  # apr_generator_config: "configs/models/deepseek-v4-flash.yml" # 受害生成器
+  apr_generator_config: "configs/models/qwen3-coder-flash.yml" # 受害生成器
+
+  # apr_generator_config: "configs/models/qwen-flash.yml" # 受害生成器
+  # apr_generator_config: "configs/models/gpt-5-mini.yml" # 受害生成器
+  # apr_generator_config: "configs/models/qwen3-coder-30b-a3b-instruct.yml" # 受害生成器
+
+  # judge_generator_config: "configs/models/deepseek-v4-flash.yml"
+  judge_generator_config: "configs/models/deepseek-v4-pro.yml"
+
+
+# ── 评估相关 ─────────────────────────────────────────────────
+eval:
+  eval_jailbreak_ablation: true # True=仅评估无越狱注释的 *_jailbreak_ablation.json
+  # eval_jailbreak_ablation: false # False=评估含越狱注释的 poisoned 原文件
+
+  eval_top_k: [10, 15]
+
+  eval_mode: "mixed" # per_cwe=仅逐 CWE；mixed=仅 CWE-MIXED；both=两者；eval_cwe仅为CWE-MIXED时自动使用mixed
+  
+  eval_cwe: ["CWE-787", "CWE-416", "CWE-125", "CWE-476", "CWE-20", "CWE-200", "CWE-119", "CWE-362"]
+
+  eval_retrieval_strategy: "dense"
+
+  # APR 提示词长度预算（防止触发远端 API 输入长度上限，如 Aliyun MaaS 的 204800 token）
+  max_ref_chars: 0       # 单条检索参考 buggy/fixed 代码的最大字符数（0 表示不截断）
+  max_prompt_chars: 0  # 整段提示词的最大字符数，超出则从尾部丢弃参考（0 表示不限制）
+
+  max_retries: 5
+  num_workers: null       # RACG并发数；null=APR模型api_pool大小，否则取配置值与池大小的较小值
+  judge_num_workers: null # Judge并发数；null=Judge模型api_pool大小，否则取配置值与池大小的较小值
+  process_num: null
+
+  # 不同 APR 模型可并行写入同一结果 JSON：跨进程锁内重读并仅合并当前模型的字段变更; 同一 JSON、同一 APR 模型只允许一个进程运行；重复启动会在清理或 API 调用前退出。
+  result_lock_timeout: 120.0 # 文件读写锁等待上限（秒）；省略时为120；0=不等待；不影响同模型立即拒绝策略
+  # 所有并发进程须使用新版生成评估脚本；勿同时用旧版、功能一致性或检索评估脚本改写同一文件。
+  # .lock 文件可保留，是否占用由操作系统锁决定；中断退出后可正常断点续跑。
+  
+  # 结果清理仅作用于当前 eval_cwe、eval_mode、eval_top_k 的 victim 及当前 APR 模型槽。
+  # clear_racg_results=True：删除 prompt、patch、Judge 结果及依赖旧补丁的 CrystalBLEU。
+  # clear_racg_results 完成后需重新运行功能一致性评估，以重新计算 CrystalBLEU。
+  # clear_judge_results=True：仅删除 is_vulnerable、relevant_vul、unresolved_pattern_ids，保留 prompt/patch。
+  # 两者同时为 True 时 clear_racg_results 优先；开关会在每次启动时执行，清理后若需断点续跑请先改回 False。
+  clear_racg_results: false
+  clear_judge_results: false
