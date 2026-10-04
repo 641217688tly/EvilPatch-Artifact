@@ -1,15 +1,14 @@
-# 智谱官方文档：https://docs.bigmodel.cn/cn/guide/models/vlm/glm-5.3-flash
-model_name: "zai-org/GLM-5.3-Flash"
-temperature: 0             # 官方推荐值，范围 [0, 1]
-max_tokens: 100000            # 思考与回答的总输出预算，最大 131072；不是 1M 上下文窗口
-reasoning_effort: "low"      # 官方推荐 max；可改为 low / high 以调整推理开销
+# Copy to the same filename without .example; see README.md.
+model_name: zai-org/GLM-5.3-Flash
+temperature: 0
+max_tokens: 100000
+reasoning_effort: low
 thinking:
-  type: "enabled"            # GLM-5.3-Flash 不支持 disabled
-  clear_thinking: false      # 官方推荐；chat() 的历史消息仍需调用方显式传入
-retry_num: 1                 # 供上层读取；SDK 另有 3 次内置重试
-timeout: 300.0               # 单次 HTTP 请求超时（秒），不是整个评估任务的总时限
-
+  type: enabled
+  clear_thinking: false
+retry_num: 1
+timeout: 300.0
 api_pool:
-  - api_key: "YOUR_BIGMODEL_API_KEY"
-    base_url: "https://open.bigmodel.cn/api/paas/v4"
-    model_name: "glm-5.3-flash"  # 可按条目覆盖实际服务使用的模型 ID
+- api_key: <API_KEY>
+  base_url: https://YOUR_OPENAI_COMPATIBLE_ENDPOINT/v1
+  model_name: <API_MODEL_NAME>

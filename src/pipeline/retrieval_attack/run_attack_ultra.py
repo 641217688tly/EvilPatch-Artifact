@@ -405,8 +405,8 @@ def main() -> int:
     )
     parser.add_argument(
         "--config", "-c",
-        default="configs/attack/retrieval/archive/abgs.yml",
-        help="配置文件路径（默认: configs/attack/retrieval/archive/abgs.yml）",
+        default="configs/attack/retrieval/gte/abgs/abgs.yml",
+        help="配置文件路径（默认: configs/attack/retrieval/gte/abgs/abgs.yml）",
     )
     args = parser.parse_args()
 

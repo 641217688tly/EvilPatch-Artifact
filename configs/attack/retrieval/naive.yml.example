@@ -1,19 +1,17 @@
-# ── 数据路径 ──────────────────────────────────────────────────
+# Copy to the same filename without .example; see README.md.
 data:
-  target_file_path: "data/query/black/target/gte/retrieval_attack/Naive/poison_targets_set_v4.json"
-  # target_file_path: "data/query/black/target/jina/retrieval_attack/Naive/poison_targets_set_v4.json"
-
-# ── 采样相关 ─────────────────────────────────────────────────
+  target_file_path: data/query/black/target/gte/naive.json
 sampling:
-  # 投毒对象超参数
-  # process_cwe: ["CWE-125", "CWE-20", "CWE-119", "CWE-787", "CWE-416"]
-  process_cwe: ["CWE-787", "CWE-416", "CWE-125", "CWE-476", "CWE-20", "CWE-200", "CWE-119", "CWE-362"]
-
-  min_condidate_num: 0 # 限制投毒目标至少包含不低于min_condidate_num个可投毒的候选token
-  max_condidate_num: 32768 # 限制投毒目标至多包含不低于max_condidate_num个可投毒的候选token
-
-
-# ──  白盒对抗攻击优化器相关 ────────────────────────────────────────────
+  process_cwe:
+  - CWE-787
+  - CWE-416
+  - CWE-125
+  - CWE-476
+  - CWE-20
+  - CWE-200
+  - CWE-119
+  - CWE-362
+  min_condidate_num: 0
+  max_condidate_num: 32768
 attack:
-  # 优化器
-  optimizer: "naive" 
+  optimizer: naive

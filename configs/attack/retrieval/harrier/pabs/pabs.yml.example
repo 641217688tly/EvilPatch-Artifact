@@ -1,183 +1,45 @@
-# ── 日志 ─────────────────────────────────────────────────────
+# Copy to the same filename without .example; see README.md.
 logging:
-  verbose: false   # true 启用 DEBUG 级别日志，false 使用 INFO 级别
-  log_dir: "logs/retrieval_attack"
-  log_every_n_iter: 1     # 每隔多少轮记录一次详细日志
-
-# ── 数据路径 ──────────────────────────────────────────────────
+  verbose: false
+  log_dir: logs/retrieval_attack
+  log_every_n_iter: 1
 data:
-  target_file_path: "data/query/black/target/harrier/split/poison_targets_set_v4_part1of10.json"
-
-# ── 模型与设备 ───────────────────────────────────────────────
+  target_file_path: data/query/black/target/harrier/pabs.json
 model:
-  retriever_config: "configs/models/harrier-oss-v1-0.6b.yml"
+  retriever_config: configs/models/harrier-oss-v1-0.6b.yml
   device_selection:
-    mode: "exclusive"                  # 为物理 GPU 获取跨进程独占租约
-    occupied_policy: "any_process"     # EvilPatch 及其他 CUDA 计算进程均视为占用
-    on_busy: "wait"                    # 所有健康 GPU 被占用时等待
-    poll_interval_seconds: 10          # 每10秒重试一次
-    wait_timeout_seconds: null         # null 表示无限等待
-    min_free_memory_mb: 24576           # 候选 GPU 最少需要24 GiB可用显存
-    max_idle_memory_used_mb: 512       # PID不可见时的显存占用兜底阈值
-    lock_dir: null                     # null -> /tmp/evilpatch-gpu-locks（Linux）
-
-
-# ── 采样相关 ─────────────────────────────────────────────────
+    mode: exclusive
+    occupied_policy: any_process
+    on_busy: wait
+    poll_interval_seconds: 10
+    wait_timeout_seconds: 300
+    min_free_memory_mb: 20000
+    max_idle_memory_used_mb: 512
+    lock_dir: null
+  device_pool:
+  - cuda:0
 sampling:
-  # 投毒对象超参数
-  # process_cwe: ["CWE-125", "CWE-20", "CWE-119", "CWE-787", "CWE-416"]
-  # process_cwe: ["CWE-119"]
-  process_cwe: ["CWE-787", "CWE-416", "CWE-125", "CWE-476", "CWE-20", "CWE-200", "CWE-119", "CWE-362"]
-  
-  min_condidate_num: 0 # 限制投毒目标至少包含不低于min_condidate_num个可投毒的候选token
-
-  max_condidate_num: 6000 # 不限制投毒目标长度
-  # max_condidate_num: 3000 # 不限制投毒目标长度
-  
-
-# ──  白盒对抗攻击优化器相关 ────────────────────────────────────────────
+  process_cwe:
+  - CWE-787
+  - CWE-416
+  - CWE-125
+  - CWE-476
+  - CWE-20
+  - CWE-200
+  - CWE-119
+  - CWE-362
+  min_condidate_num: 0
+  max_condidate_num: 6000
 attack:
-  # 优化器
-  optimizer: "pabs"        # 优化方法：可选 "aggd"（近似贪婪梯度下降）| "abgs"（近似束梯度搜索） | "pabs"（位置感知的束搜索）
-  beam_width: 10           # 束宽 B（abgs 和 pabs 模式使用）
-  adv_seq_length: 20       # pabs所需的额外参数，要插入的对抗序列的token长度
-
-  # patience: 15              # Patience 早停：连续多少轮全局最优未改善时触发早停（设为 0 可禁用）
-  patience: 10              # Patience 早停：连续多少轮全局最优未改善时触发早停（设为 0 可禁用）
-
-  # 损失函数
-  loss_func: "expected_sim"  # 损失函数类型：可选 "expected_sim"（均匀期望相似度）| "expected_sim" + dynamic_weight=true（带动态权重的期望相似度）
-  dynamic_weight: false      # 是否使用动态权重（true: 启用难例挖掘; false: 使用均匀权重）
-  scaling_factor: 1.0        # 缩放系数 α，控制动态权重对未达标样本的敏感度（仅 dynamic_weight=true 时生效）
-  
-  # 优化模块
-  N: 50                   # 最大迭代轮数
-  
-  n: 6000                 # 每轮全局候选集大小
-  # n: 3000                 # 每轮全局候选集大小
-
-  tau_stop: 0.95          # 早停相似度阈值
-  similarity_metric: "cosine"  # 相似度函数类型
-  seed: 42                # 随机种子
-
-  frozen_token_dict:  # 冻结 token 集合（解耦为 structure / keywords / punctuation_and_operators）
-    structure: # ── structure：控制流 / 数据流结构关键字（is_safe_position 与 is_safe_candidate 均冻结）──
-      - "return"
-      - "if"
-      - "else"
-      - "for"
-      - "while"
-      - "do"
-      - "switch"
-      - "case"
-      - "default"
-      - "break"
-      - "continue"
-      - "goto"
-    keywords: # ── keywords：类型声明 / 访问控制等非结构关键字（仅 is_safe_position 冻结；允许作为隐蔽替换候选）──
-      # ── C 类型与限定符 ──
-      - "int"
-      - "void"
-      - "char"
-      - "float"
-      - "double"
-      - "long"
-      - "short"
-      - "unsigned"
-      - "signed"
-      - "struct"
-      - "typedef"
-      - "enum"
-      - "union"
-      - "const"
-      - "static"
-      - "extern"
-      - "volatile"
-      - "sizeof"
-      - "NULL"
-      - "auto"
-      - "register"
-      # ════════════════════════════════════════════
-      # ── C99 / C11 新增关键字──
-      # ════════════════════════════════════════════
-      - "inline"            # 内联函数（C99+）
-      - "restrict"          # 指针限定符（C99+）
-      - "_Bool"             # 布尔类型（C99）
-      - "bool"              # _Bool 的宏别名（<stdbool.h>，C99；C23 起为关键字）
-      - "_Complex"          # 复数类型（C99）
-      - "_Imaginary"        # 虚数类型（C99）
-      - "_Atomic"           # 原子类型限定符（C11）
-      - "_Static_assert"    # 静态断言（C11）
-      - "static_assert"     # _Static_assert 的宏别名（C11；C23 起为关键字）
-      - "_Thread_local"     # 线程局部存储（C11）
-      - "thread_local"      # _Thread_local 的宏别名（C11；C23 起为关键字）
-      - "_Alignas"          # 对齐说明符（C11）
-      - "alignas"           # _Alignas 的宏别名（C11；C23 起为关键字）
-      - "_Alignof"          # 对齐查询（C11）
-      - "alignof"           # _Alignof 的宏别名（C11；C23 起为关键字）
-      - "_Noreturn"         # 无返回声明（C11）
-      - "_Generic"          # 泛型选择（C11）
-      - "true"              # 布尔真值（<stdbool.h>）
-      - "false"             # 布尔假值（<stdbool.h>）
-      # ── 预处理指令 ──
-      - "#include"
-      - "#define"
-      - "#ifdef"
-      - "#ifndef"
-      - "#endif"
-      - "#else"
-      - "#elif"
-      - "#pragma"
-      - "#undef"             # 取消宏定义（补充）
-      - "#if"                # 条件编译（补充）
-      - "#error"             # 编译期错误（补充）
-      - "#warning"           # 编译期警告（补充，GCC/Clang 扩展）
-      - "#line"              # 行号控制（补充）
-      - "defined"            # 预处理运算符（补充）
-    punctuation_and_operators:
-      # ════════════════════════════════════════════
-      # ── 单字符运算符与标点 ──
-      # ════════════════════════════════════════════
-      - "#"                  # 字符串化运算符（宏内，补充）
-      - "]"
-      - "{"
-      - "}"
-      - ";"
-      - "!"                  # 逻辑非（补充）
-      - "~"                  # 按位取反（补充）
-      - "|"                  # 按位或（补充）
-      - "^"                  # 按位异或（补充）
-      - "%"                  # 取模（补充）
-      - "?"                  # 三目运算符条件部分
-      - "`"                  # 数字分隔符
-      # ════════════════════════════════════════════
-      # ── 多字符运算符 ──
-      # ════════════════════════════════════════════
-      - "##"                 # 标记粘接运算符（补充）
-      - "+="
-      - "-="
-      - "*="
-      - "/="
-      - "->"
-      - "=="
-      - "!="
-      - "<="
-      - ">="
-      - "&&"
-      - "||"
-      - "<<"
-      - ">>"
-      - "++"                 # 自增（补充）
-      - "--"                 # 自减（补充）
-      - "%="                 # 取模赋值（补充）
-      - "&="                 # 按位与赋值（补充）
-      - "|="                 # 按位或赋值（补充）
-      - "^="                 # 按位异或赋值（补充）
-      - "<<="                # 左移赋值（补充）
-      - ">>="                # 右移赋值（补充）
-      - ".*"                 # 成员指针访问（补充）
-      - "->*"                # 指针成员指针访问（补充）
-      - "::"                 # 作用域解析运算符（补充）
-      - "..."                # 可变参数 / 包展开（补充）
-      - "<=>"                # 三路比较运算符（C++20，补充）
-      - "?:"                 # 三目运算符整体（补充）
+  optimizer: pabs
+  beam_width: 10
+  adv_seq_length: 20
+  patience: 10
+  loss_func: expected_sim
+  dynamic_weight: false
+  scaling_factor: 1.0
+  N: 50
+  n: 4000
+  tau_stop: 0.95
+  similarity_metric: cosine
+  seed: 42

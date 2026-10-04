@@ -1,23 +1,21 @@
-# Windows 环境下通常通过 pymilvus 的本地 URI 使用 Milvus Lite，
-# 不额外安装 milvus-lite 独立包（该包在部分平台无可用发行版）。
-pymilvus>=2.5.0
-langchain>=0.3.0
-langchain-milvus>=0.1.8
-langchain-huggingface>=0.1.0
-sentence-transformers>=3.0.0
+# Main environment: Python 3.11 on Linux. Install a CUDA-compatible PyTorch build first.
+torch>=2.7.1
 transformers>=4.53.0
-torch>=2.7.1 # pip install torch torchvision --index-url https://download.pytorch.org/whl/cu130  或者使用镜像源：pip install torch==2.10.0 torchvision==0.25.0 -f https://mirrors.aliyun.com/pytorch-wheels/cu130
+sentence-transformers>=3.0.0
+pymilvus[milvus_lite]>=2.5.0
 einops>=0.8.0
+numpy>=1.24.0
+pandas
+scikit-learn
+matplotlib
+yellowbrick
 tqdm>=4.66.0
 pyyaml>=6.0
-numpy>=1.24.0
 ijson>=3.2.0
-seaborn
-yellowbrick
-ijson
-nbconvert
 openai
 clang-format
-pymilvus[milvus_lite]
 crystalbleu
 nltk
+jupyterlab
+ipykernel
+nbconvert

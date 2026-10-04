@@ -1,21 +1,12 @@
-model_name: "jinaai/jina-code-embeddings-0.5b" # 模型名称
-device: "cuda"      # 单卡模式下的设备（当 device_pool 非空时被覆盖）
-device_pool:        # 设备池：模型加载时依次探测，自动选择第一张可用显卡
-  - "cuda:0"
-  - "cuda:1"
-  - "cuda:2"
-  - "cuda:3"
-  - "cuda:4"
-  - "cuda:5"
-  - "cuda:6"
-  - "cuda:7"
-  - "cuda:8"
-  - "cuda:9"
-max_length: 32768 # 最大长度为32768
-batch_size: 1 # 批量大小
-# batch_size: 96 # 批量大小，32GB显存建议设置为96
-normalize_embeddings: true # 是否归一化
-dim: 896 # 维度
-task: "code2code" # 任务
-torch_dtype: "bfloat16" # 数据类型
-chunk_overlap_tokens: 1000 # 分块时相邻 chunk 的重叠 token 数
+# Copy to the same filename without .example; see README.md.
+model_name: jinaai/jina-code-embeddings-0.5b
+device: cuda
+device_pool:
+- cuda:0
+max_length: 32768
+batch_size: 1
+normalize_embeddings: true
+dim: 896
+task: code2code
+torch_dtype: bfloat16
+chunk_overlap_tokens: 1000

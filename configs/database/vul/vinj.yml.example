@@ -1,64 +1,18 @@
-# 应用场景：src/pipeline/generation_attack
-
-# 数据路径
+# Copy to the same filename without .example; see README.md.
 data:
-  corpus: "data/corpus/vul/clustered_rag_data.jsonl" # 知识库数据集
-
-  query: "data/query/black/target/poison_targets_set_v4.json" 
-
-# 数据库配置
+  corpus: data/corpus/vul/clustered_rag_data.jsonl
+  query: data/query/black/target/poison_targets_set_v4.json
 database:
-  # model: "configs/models/harrier-oss-v1-0.6b.yml"
-  # uri: "data/milvus/vul/harrier-oss-v1-0.6b-1.db" 
-
-  # model: "configs/models/harrier-oss-v1-0.6b.yml"
-  # uri: "data/milvus/vul/harrier-oss-v1-0.6b-2.db" 
-
-  model: "configs/models/harrier-oss-v1-0.6b.yml"
-  uri: "data/milvus/vul/harrier-oss-v1-0.6b-3.db" 
-
-  # model: "configs/models/harrier-oss-v1-0.6b.yml"
-  # uri: "data/milvus/vul/harrier-oss-v1-0.6b-4.db"   
-
-  # model: "configs/models/harrier-oss-v1-0.6b.yml"
-  # uri: "data/milvus/vul/harrier-oss-v1-0.6b-5.db"   
-
-  # model: "configs/models/harrier-oss-v1-0.6b.yml"
-  # uri: "data/milvus/vul/harrier-oss-v1-0.6b-6.db"   
-
-  # model: "configs/models/harrier-oss-v1-0.6b.yml"
-  # uri: "data/milvus/vul/harrier-oss-v1-0.6b-7.db" 
-
-  # model: "configs/models/harrier-oss-v1-0.6b.yml"
-  # uri: "data/milvus/vul/harrier-oss-v1-0.6b-8.db" 
-
-  # model: "configs/models/harrier-oss-v1-0.6b.yml"
-  # uri: "data/milvus/vul/harrier-oss-v1-0.6b-9.db" 
-
-  # model: "configs/models/harrier-oss-v1-0.6b.yml"
-  # uri: "data/milvus/vul/harrier-oss-v1-0.6b-10.db"   
-
-  # model: "configs/models/harrier-oss-v1-0.6b.yml"
-  # uri: "data/milvus/vul/harrier-oss-v1-0.6b-11.db"   
-
-  # model: "configs/models/harrier-oss-v1-0.6b.yml"
-  # uri: "data/milvus/vul/harrier-oss-v1-0.6b-12.db"   
-
-  # model: "configs/models/harrier-oss-v1-0.6b.yml"
-  # uri: "data/milvus/vul/harrier-oss-v1-0.6b-13.db"   
-
-  # model: "configs/models/harrier-oss-v1-0.6b.yml"
-  # uri: "data/milvus/vul/harrier-oss-v1-0.6b-14.db"  
-  
-  collection_name: "vul" # Milvus数据库内的集合名称（等同于Mysql的表名）
-
-# 检索配置
+  model: configs/models/harrier-oss-v1-0.6b.yml
+  uri: data/milvus/vul/harrier-oss-v1-0.6b.db
+  collection_name: vul
 retrieval:
-  dense_index_type: "AUTOINDEX" # 密集向量索引类型：自动索引
-  dense_metric_type: "COSINE" # 密集向量距离度量类型：余弦相似度
-  dense_index_params: {"M": 16, "efConstruction": 256} # 密集向量索引参数：M为每个节点存储的邻居数量，efConstruction为搜索时考虑的邻居数量
-  
-  top_k: 10 # 召回数量
-  retrieval_strategy: "dense" # 检索策略：hybrid(混合检索)、dense(密集检索)、sparse(稀疏检索)
-  cluster_search: false # 是否启用分簇召回策略
-  alpha_weight: 0.5 # 混合检索的权重, 仅在 retrieval_strategy 为 hybrid 时生效, 0.5表示50%的权重给密集向量, 50%的权重给稀疏向量
+  dense_index_type: AUTOINDEX
+  dense_metric_type: COSINE
+  dense_index_params:
+    M: 16
+    efConstruction: 256
+  top_k: 10
+  retrieval_strategy: dense
+  cluster_search: false
+  alpha_weight: 0.5

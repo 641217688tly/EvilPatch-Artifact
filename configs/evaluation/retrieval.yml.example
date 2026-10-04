@@ -1,40 +1,22 @@
-# ── 数据路径 ──────────────────────────────────────────────────
+# Copy without .example; finalize targets before evaluation.
 data:
-  # 消融实验
-  # poisoned_file_path: "data/query/black/target/gte/retrieval_attack/Ablation/PABS-Patience10/poison_targets_set_v4_tau_2_top_10_merged_intersected.json"
-  # poisoned_file_path: "data/query/black/target/gte/retrieval_attack/Ablation/ABGS/poison_targets_set_v4_tau_2_top_10_merged_intersected.json"
-  # poisoned_file_path: "data/query/black/target/gte/retrieval_attack/Ablation/ABGS-wo-dl/poison_targets_set_v4_tau_2_top_10_merged_intersected.json"
-  # poisoned_file_path: "data/query/black/target/gte/retrieval_attack/Ablation/ABGS-wo-sv/poison_targets_set_v4_tau_2_top_10_merged_intersected.json"
-  # poisoned_file_path: "data/query/black/target/gte/retrieval_attack/Ablation/ABGS-wo-dl-sv/poison_targets_set_v4_tau_2_top_10_merged_intersected.json"
-  # poisoned_file_path: "data/query/black/target/gte/retrieval_attack/Ablation/ABGS-wo-dl-sv-e/poison_targets_set_v4_tau_2_top_10_merged_intersected.json"
-
-  # 基线对比
-  # poisoned_file_path: "data/query/black/target/gte/merged/Naive/poison_targets_set_v4_intersected.json"
-  # poisoned_file_path: "data/query/black/target/gte/merged/ABGS/poison_targets_set_v4_merged_intersected.json"
-  # poisoned_file_path: "data/query/black/target/gte/merged/PABS/poison_targets_set_v4_merged_intersected.json"
-  # poisoned_file_path: "data/query/black/target/gte/merged/AGGD/poison_targets_set_v4_merged_intersected.json"
-
-  # poisoned_file_path: "data/query/black/target/jina/merged/Naive/poison_targets_set_v4_intersected.json"
-  # poisoned_file_path: "data/query/black/target/jina/merged/ABGS/poison_targets_set_v4_merged_intersected.json"
-  # poisoned_file_path: "data/query/black/target/jina/merged/PABS/poison_targets_set_v4_merged_intersected.json"
-  # poisoned_file_path: "data/query/black/target/jina/merged/AGGD/poison_targets_set_v4_merged_intersected.json"
-
-  poisoned_file_path: "data/query/black/target/gte/retrieval_attack/ABGS-Naive/poison_targets_set_v4_merged_intersected.json"
-  # poisoned_file_path: "data/query/black/target/gte/retrieval_attack/ABGS-Naive-e/poison_targets_set_v4_tau_2_top_10_merged_intersected.json"
-  
-  test_file_path: "data/query/black/test/test_query_set_v4.json"
-  
+  poisoned_file_path: data/query/black/target/gte/gpbs_final.json
+  test_file_path: data/query/black/test/test_query_set_v4.json
 database:
-  milvus_config: "configs/database/bfp/apr.yml"
-
-# ── 评估相关 ─────────────────────────────────────────────────
+  milvus_config: configs/database/bfp/apr.yml
 eval:
-  eval_cwe: ["CWE-119"] # 从eval_cwe内的CWE投毒目标子集中选择待插入的投毒对象
-  # eval_cwe: ["CWE-787", "CWE-416", "CWE-125", "CWE-476", "CWE-20", "CWE-200", "CWE-119", "CWE-362"] # 从eval_cwe内的CWE投毒目标子集中选择待插入的投毒对象
-  # eval_cwe: ["CWE-125", "CWE-20", "CWE-119", "CWE-787", "CWE-416"] # 从eval_cwe内的CWE投毒目标子集中选择待插入的投毒对象
-  
-  eval_top_k: [5, 10, 15] # ASR-R 评估的 Top-K 列表（可配置多个值，一次运行同时计算并输出各 Top-K 下的 ASR-R）
-  eval_unpoisoned_target: False # True=[poisoned]模式下同时插入尚未完成检索攻击的目标文档（以原始buggy_code入库），与已完成攻击的目标文档（poisoned_buggy_code）共同构成知识库，使[poisoned]模式的文档总量(N)与[baseline]模式一致，避免检索竞争环境不公平导致的ASR-R偏差；False=[poisoned]模式仅插入已完成检索攻击（含poisoned_buggy_code）的目标文档
-  eval_unfinished_jailbreak_target: True # True=[poisoned]模式允许已完成检索攻击但未完成jailbreak的目标，以poisoned_buggy_code + entity.fixed_code注入；仅用于检索评估
-  eval_mode: "per_cwe" # per_cwe=仅逐 CWE；mixed=仅 CWE-MIXED；both=两者；eval_cwe仅为CWE-MIXED时自动使用mixed
-  eval_retrieval_naive: True # True=自动产出 naive 与 poisoned 两套结果；False=仅产出 poisoned 结果
+  eval_cwe:
+  - CWE-787
+  - CWE-416
+  - CWE-125
+  - CWE-476
+  - CWE-20
+  - CWE-200
+  - CWE-119
+  - CWE-362
+  eval_top_k:
+  - 15
+  eval_unpoisoned_target: false
+  eval_unfinished_jailbreak_target: false
+  eval_mode: both
+  eval_retrieval_naive: false

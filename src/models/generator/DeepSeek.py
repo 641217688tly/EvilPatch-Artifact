@@ -52,6 +52,9 @@ class DeepSeekGenerator(BaseGenerator):
         self.max_tokens = config.get("max_tokens", 4096)
         self.timeout = BaseGenerator._resolve_timeout(config)
         self.retry_num = config.get("retry_num", 3)
+        self.thinking = config.get("thinking")
+        if self.thinking not in (None, "enabled", "disabled"):
+            raise ValueError("thinking must be 'enabled', 'disabled', or omitted")
 
         api_key, self.base_url, self.model_name = BaseGenerator._resolve_api_credentials(
             config, pool_index
@@ -85,11 +88,14 @@ class DeepSeekGenerator(BaseGenerator):
         """
         max_tokens = max_tokens or self.max_tokens
         try:
+            thinking_option = ({"extra_body": {"thinking": {"type": self.thinking}}}
+                               if self.thinking is not None else {})
             response = self.client.chat.completions.create(
                 model=self.model_name,
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=max_tokens,
                 temperature=self.temperature,
+                **thinking_option,
             )
             return response.choices[0].message.content
         except Exception as e:
@@ -113,11 +119,14 @@ class DeepSeekGenerator(BaseGenerator):
         """
         max_tokens = max_tokens or self.max_tokens
         try:
+            thinking_option = ({"extra_body": {"thinking": {"type": self.thinking}}}
+                               if self.thinking is not None else {})
             response = self.client.chat.completions.create(
                 model=self.model_name,
                 messages=messages,
                 max_tokens=max_tokens,
                 temperature=self.temperature,
+                **thinking_option,
             )
             return response.choices[0].message.content
         except Exception as e:

@@ -13,6 +13,7 @@ import os
 import queue
 import tempfile
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
@@ -273,7 +274,18 @@ def atomic_save_json(path: str | Path, data: Any) -> None:
             json.dump(data, handle, ensure_ascii=False, indent=2)
             handle.flush()
             os.fsync(handle.fileno())
-        os.replace(tmp_name, target)
+        # On Windows, a brief reader or antivirus handle can deny replacing
+        # the destination even though the temporary file is complete. Keep
+        # the same temp file and retry the atomic replacement for a bounded
+        # interval; all other errors still surface to the caller.
+        for attempt in range(10):
+            try:
+                os.replace(tmp_name, target)
+                break
+            except PermissionError:
+                if os.name != "nt" or attempt == 9:
+                    raise
+                time.sleep(min(0.05 * (2 ** attempt), 1.0))
     except BaseException:
         try:
             os.unlink(tmp_name)
